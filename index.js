@@ -21,8 +21,24 @@ var token = process.env.TOKEN || 'token';
 var received_updates = [];
 
 app.get('/', function(req, res) {
-  console.log(req);
-  res.send('<pre>' + JSON.stringify(received_updates, null, 2) + '</pre>');
+  res.send(`
+    <html>
+      <head>
+        <title>Webhook Test</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+          h1 { color: #333; }
+          pre { background: #eee; padding: 16px; border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <h1>Bem-vindo ao Webhook Test</h1>
+        <p>Use este endpoint para testar webhooks do Facebook, Instagram e Threads.</p>
+        <h2>Últimos Webhooks Recebidos</h2>
+        <pre>${JSON.stringify(received_updates, null, 2)}</pre>
+      </body>
+    </html>
+  `);
 });
 
 app.get(['/facebook', '/instagram', '/threads'], function(req, res) {
@@ -30,7 +46,17 @@ app.get(['/facebook', '/instagram', '/threads'], function(req, res) {
     req.query['hub.mode'] == 'subscribe' &&
     req.query['hub.verify_token'] == token
   ) {
-    res.send(req.query['hub.challenge']);
+    // Exibe o hub.challenge e a origem do request na tela
+    res.send(`
+      <html>
+        <head><title>Webhook Challenge</title></head>
+        <body>
+          <h2>Webhook Challenge Recebido</h2>
+          <p><strong>hub.challenge:</strong> ${req.query['hub.challenge']}</p>
+          <p><strong>Origem do Request:</strong> ${req.originalUrl}</p>
+        </body>
+      </html>
+    `);
   } else {
     res.sendStatus(400);
   }
